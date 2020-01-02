@@ -1,4 +1,4 @@
-const LATEST_VERSION = "0.1.2";
+const LATEST_VERSION = "0.1.3";
 
 workbox.core.setCacheNameDetails({ prefix: "d4" });
 //Change this value every time before you build
