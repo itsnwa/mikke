@@ -296,6 +296,7 @@ export default {
   display: flex;
   flex-direction: column;
   user-select: none;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 .score {
   flex: 1;
@@ -320,6 +321,7 @@ export default {
   left: 100px;
   top: 0;
   user-select: none;
+  padding-bottom: env(safe-area-inset-bottom);
 }
 .player {
   position: relative;
