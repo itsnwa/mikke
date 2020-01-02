@@ -26,7 +26,6 @@
         :key="playerIndex"
       >
         <div class="name">
-          <img class="avatar" :src="player.avatar" />
           {{ player.name }}
           <div class="points">
             {{ player.points }}
@@ -47,94 +46,64 @@
                 fill-rule="evenodd"
                 clip-rule="evenodd"
                 d="M26 48.5333C38.4448 48.5333 48.5333 38.4448 48.5333 26C48.5333 13.5552 38.4448 3.46667 26 3.46667C13.5552 3.46667 3.46667 13.5552 3.46667 26C3.46667 38.4448 13.5552 48.5333 26 48.5333ZM26 52C40.3594 52 52 40.3594 52 26C52 11.6406 40.3594 0 26 0C11.6406 0 0 11.6406 0 26C0 40.3594 11.6406 52 26 52Z"
-                :fill="score === 3 ? `white` : `transparent`"
+                :fill="score >= 3 ? `white` : `transparent`"
               />
               <rect
                 width="4.08418"
                 height="40.8418"
                 rx="1"
                 transform="matrix(0.708377 -0.705834 0.708377 0.705834 10 13.1725)"
-                :fill="score > 1 ? `white` : `transparent`"
+                :fill="score >= 2 ? `white` : `transparent`"
               />
               <rect
                 width="4.08418"
                 height="40.8418"
                 rx="1"
                 transform="matrix(-0.708377 -0.705834 0.708377 -0.705834 13.0686 41.7103)"
-                :fill="score > 0 ? `white` : `transparent`"
+                :fill="score >= 1 ? `white` : `transparent`"
               />
             </svg>
           </div>
         </div>
       </div>
     </div>
+    <div class="add-new-player">
+      <div class="label">Player name</div>
+      <input type="text" v-model="newPlayer" @keyup.enter="addPlayer" />
+    </div>
   </div>
 </template>
 
 <script>
-import moggAvatar from "./assets/møgg.jpg";
-import michaelAvatar from "./assets/michael.jpg";
-import nichlasAvatar from "./assets/nichlas.jpg";
-import matsAvatar from "./assets/mats.jpg";
-import ulleAvatar from "./assets/ulle.jpg";
-
 export default {
   name: "app",
   data() {
     return {
       records: [],
-      players: [
-        {
-          name: "Mats",
-          scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          points: 0,
-          avatar: matsAvatar,
-          finished: false,
-          hit: false
-        },
-        {
-          name: "Nichlas",
-          scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          points: 0,
-          avatar: nichlasAvatar,
-          finished: false,
-          hit: false
-        },
-        {
-          name: "Møgg",
-          scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          points: 0,
-          avatar: moggAvatar,
-          finished: false,
-          hit: false
-        },
-        {
-          name: "Michael",
-          scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          points: 0,
-          avatar: michaelAvatar,
-          finished: false,
-          hit: false
-        },
-        {
-          name: "Ulle",
-          scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          points: 0,
-          avatar: ulleAvatar,
-          finished: false,
-          hit: false
-        }
-      ],
+      players: [],
       scores: ["20", "19", "18", "17", "16", "15", "14", "T", "D", "B"],
       scoreValues: [...Array(21).keys()].slice(1).reverse(),
       selectingNumber: false,
       selectedNumber: null,
       isTriple: false,
       isDouble: false,
-      notDonePlayers: null
+      notDonePlayers: null,
+      newPlayer: ""
     };
   },
   methods: {
+    addPlayer() {
+      if (this.newPlayer.length >= 2) {
+        this.players.push({
+          name: this.newPlayer,
+          scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          points: 0,
+          finished: false,
+          hit: false
+        });
+        this.newPlayer = "";
+      }
+    },
     undo() {
       this.records.pop();
       this.players = JSON.parse(
@@ -153,6 +122,23 @@ export default {
           player.hit = false;
         }, 1000);
       });
+
+      this.players.forEach(player => {
+        if (player.scores.every(score => score === 3)) {
+          // Check if player has the least amount of points
+          let pointsList = this.players.map(player => player.points);
+          let lowScore = Math.min.apply(Math, pointsList);
+          let scoreIndex = pointsList.indexOf(lowScore);
+          let bestPlayer = this.players[scoreIndex];
+
+          if (bestPlayer.name === player.name) {
+            player.finished = true;
+          }
+        } else {
+          player.finished = false;
+        }
+      });
+
       this.selectingNumber = false;
       this.selectedNumber = null;
       this.isTriple = false;
@@ -165,6 +151,21 @@ export default {
         setTimeout(() => {
           player.hit = false;
         }, 1000);
+      });
+      this.players.forEach(player => {
+        if (player.scores.every(score => score === 3)) {
+          // Check if player has the least amount of points
+          let pointsList = this.players.map(player => player.points);
+          let lowScore = Math.min.apply(Math, pointsList);
+          let scoreIndex = pointsList.indexOf(lowScore);
+          let bestPlayer = this.players[scoreIndex];
+
+          if (bestPlayer.name === player.name) {
+            player.finished = true;
+          }
+        } else {
+          player.finished = false;
+        }
       });
       this.selectingNumber = false;
       this.selectedNumber = null;
@@ -200,7 +201,7 @@ export default {
             player.hit = true;
             setTimeout(() => {
               player.hit = false;
-            }, 1000);
+            }, 2000);
             player.points += 25;
           });
         }
@@ -234,11 +235,13 @@ export default {
 
 <style lang="scss">
 #app {
-  display: flex;
-  height: 100%;
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow-x: auto;
 }
 .undo {
-  position: fixed;
+  position: absolute;
   left: 0;
   top: 0;
   width: 100px;
@@ -255,8 +258,11 @@ export default {
   }
 }
 .scores {
+  position: absolute;
+  left: 0;
+  top: 120px;
   width: 100px;
-  height: 100vh;
+  height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
 }
@@ -267,17 +273,20 @@ export default {
   justify-content: center;
   border-bottom: 1px solid #333;
   border-right: 1px solid #333;
-  &:first-of-type {
-    margin-top: 120px;
-  }
+  line-height: 0;
+  font-size: 1.2rem;
+  font-weight: bold;
   &:last-of-type {
     border-bottom: 0;
   }
 }
 .players {
   display: flex;
-  flex: 1;
   height: 100vh;
+  width: calc(100vw - 100px);
+  position: absolute;
+  left: 100px;
+  top: 0;
 }
 .player {
   position: relative;
@@ -286,8 +295,8 @@ export default {
   flex-direction: column;
   border-right: 1px solid #333;
   &.hit {
-    .name {
-      background-color: rgb(236, 84, 73);
+    .points {
+      color: rgb(236, 84, 73);
     }
   }
   &:hover {
@@ -304,7 +313,7 @@ export default {
   transform: translate(-50%, -50%);
   width: 90%;
   img {
-    max-width: 100%;
+    width: 100%;
   }
 }
 .name {
@@ -314,10 +323,9 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
-  line-height: 1.5;
+  font-size: 1rem;
+  font-weight: bold;
   text-align: center;
-  transition: background-color 1s ease;
   .avatar {
     width: 40px;
     height: 40px;
@@ -327,6 +335,7 @@ export default {
     font-size: 18px;
     margin-top: 0.5rem;
     color: #999;
+    transition: color 1s ease;
   }
 }
 .player-scores {
@@ -356,8 +365,8 @@ export default {
     border: 0;
   }
   svg {
-    width: 56px;
-    height: 56px;
+    width: 2rem;
+    height: 2rem;
   }
 }
 .number-picker {
@@ -399,5 +408,16 @@ export default {
   &:nth-of-type(4n + 4) {
     border-bottom: 1px solid var(--border-color);
   }
+}
+.add-new-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  left: 100vw;
+  top: 0;
 }
 </style>

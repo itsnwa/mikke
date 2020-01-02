@@ -1,24 +1,9 @@
-# dart-scorer
+# Mikke
 
-## Project setup
-```
-yarn install
-```
-
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
-
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Todo
+- [ ] Add / remove players to the line-up
+- [ ] Give a random color to players
+- [ ] When game is finished, prompt about starting a new game,
+      if a new game is wanted, rank the players and re-set the
+      line-up so the lower ranked player starts.
+- [ ] Ability to re-order player list.
