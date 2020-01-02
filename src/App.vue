@@ -3,11 +3,12 @@
     <div class="number-picker" v-if="selectingNumber">
       <div
         class="number"
-        v-for="(number, index) in scoreValues"
+        v-for="(number, index) in pointValues"
         :key="index"
         @click="setPoints(number)"
       >
-        {{ number }}
+        <span v-if="number === 50">Bull (50)</span>
+        <span v-else>{{ number }}</span>
       </div>
     </div>
     <div class="undo" :class="{ disabled: records.length <= 1 }" @click="undo">
@@ -102,6 +103,15 @@ export default {
       newPlayer: ""
     };
   },
+  computed: {
+    pointValues() {
+      if (this.isDouble) {
+        return [...this.scoreValues, 50];
+      } else {
+        return this.scoreValues;
+      }
+    }
+  },
   methods: {
     restartGame() {
       this.records = [];
@@ -177,7 +187,7 @@ export default {
       this.isTriple = false;
     },
     scoreDouble(number) {
-      let points = number * 2;
+      let points = number === 50 ? number : number * 2;
       this.notDonePlayers.forEach(player => {
         player.points += points;
         player.hit = true;
@@ -331,8 +341,11 @@ export default {
   border-right: 1px solid #333;
   user-select: none;
   &.hit {
+    .name {
+      background-color: rgb(236, 84, 73);
+    }
     .points {
-      color: rgb(236, 84, 73);
+      color: white;
     }
   }
   &:hover {
@@ -363,6 +376,7 @@ export default {
   font-weight: bold;
   text-align: center;
   user-select: none;
+  transition: background-color 1s ease;
   .points {
     font-size: 18px;
     margin-top: 0.5rem;
@@ -411,8 +425,8 @@ export default {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 512px;
-  height: 512px;
+  width: 90vw;
+  height: 50vh;
   border-radius: 16px;
   color: white;
   z-index: 100;
