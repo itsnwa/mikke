@@ -70,6 +70,10 @@
     <div class="add-new-player">
       <div class="label">Player name</div>
       <input type="text" v-model="newPlayer" @keyup.enter="addPlayer" />
+      <div class="game-controller">
+        <button class="button" @click="restartGame">Restart game</button>
+        <button class="button" @click="resetGame">Reset</button>
+      </div>
     </div>
   </div>
 </template>
@@ -92,6 +96,27 @@ export default {
     };
   },
   methods: {
+    restartGame() {
+      this.records = [];
+      this.isTriple = false;
+      this.isDouble = false;
+      this.notDonePlayers = null;
+      this.players.forEach(player => {
+        player.scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+        player.points = 0;
+        player.finished = false;
+        player.hit = false;
+      });
+    },
+    resetGame() {
+      this.players = [];
+      this.records = [];
+      this.selectingNumber = false;
+      this.selectedNumber = null;
+      this.isTriple = false;
+      this.isDouble = false;
+      this.notDonePlayers = null;
+    },
     addPlayer() {
       if (this.newPlayer.length >= 2) {
         this.players.push({
@@ -419,5 +444,12 @@ export default {
   position: absolute;
   left: 100vw;
   top: 0;
+}
+.button {
+  -moz-appearance: none;
+  background-color: white;
+  border-radius: 0.3rem;
+  padding: 0.8rem 1rem;
+  margin-top: 2rem;
 }
 </style>
