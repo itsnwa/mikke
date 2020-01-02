@@ -296,7 +296,7 @@ export default {
   display: flex;
   flex-direction: column;
   user-select: none;
-  padding-bottom: env(safe-area-inset-bottom);
+  padding: 0 0 env(safe-area-inset-bottom) 0;
 }
 .score {
   flex: 1;
@@ -321,7 +321,6 @@ export default {
   left: 100px;
   top: 0;
   user-select: none;
-  padding-bottom: env(safe-area-inset-bottom);
 }
 .player {
   position: relative;
@@ -376,6 +375,7 @@ export default {
   flex-direction: column;
   height: 100%;
   user-select: none;
+  padding: 0 0 env(safe-area-inset-bottom) 0;
 }
 .player-score {
   position: relative;
