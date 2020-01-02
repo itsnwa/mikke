@@ -274,8 +274,8 @@ export default {
   position: absolute;
   left: 0;
   top: 0;
-  width: 100px;
-  height: 120px;
+  width: 4rem;
+  height: 6rem;
   border-bottom: 1px solid #333;
   border-right: 1px solid #333;
   font-size: 16px;
@@ -290,9 +290,9 @@ export default {
 .scores {
   position: absolute;
   left: 0;
-  top: 120px;
-  width: 100px;
-  height: calc(100vh - 120px);
+  top: 6rem;
+  width: 4rem;
+  height: calc(100vh - 6rem);
   display: flex;
   flex-direction: column;
   user-select: none;
@@ -316,11 +316,12 @@ export default {
 .players {
   display: flex;
   height: 100vh;
-  width: calc(100vw - 100px);
+  width: calc(100vw - 4rem);
   position: absolute;
-  left: 100px;
+  left: 4rem;
   top: 0;
   user-select: none;
+  padding: 0 0 env(safe-area-inset-bottom) 0;
 }
 .player {
   position: relative;
@@ -352,7 +353,7 @@ export default {
   }
 }
 .name {
-  flex: 0 0 120px;
+  flex: 0 0 6rem;
   border-bottom: 1px solid #333;
   display: flex;
   flex-direction: column;
@@ -375,7 +376,6 @@ export default {
   flex-direction: column;
   height: 100%;
   user-select: none;
-  padding: 0 0 env(safe-area-inset-bottom) 0;
 }
 .player-score {
   position: relative;
