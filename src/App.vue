@@ -68,8 +68,15 @@
       </div>
     </div>
     <div class="add-new-player">
-      <div class="label">Player name</div>
-      <input type="text" v-model="newPlayer" @keyup.enter="addPlayer" />
+      <div class="label">New player name</div>
+      <input type="text" v-model="newPlayer" />
+      <button
+        class="button"
+        :disabled="newPlayer.length < 2"
+        @click="addPlayer"
+      >
+        Add
+      </button>
       <div class="game-controller">
         <button class="button" @click="restartGame">Restart game</button>
         <button class="button" @click="resetGame">Reset</button>
@@ -290,6 +297,7 @@ export default {
   height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
+  user-select: none;
 }
 .score {
   flex: 1;
@@ -301,6 +309,7 @@ export default {
   line-height: 0;
   font-size: 1.2rem;
   font-weight: bold;
+  user-select: none;
   &:last-of-type {
     border-bottom: 0;
   }
@@ -312,6 +321,7 @@ export default {
   position: absolute;
   left: 100px;
   top: 0;
+  user-select: none;
 }
 .player {
   position: relative;
@@ -319,6 +329,7 @@ export default {
   display: flex;
   flex-direction: column;
   border-right: 1px solid #333;
+  user-select: none;
   &.hit {
     .points {
       color: rgb(236, 84, 73);
@@ -351,22 +362,20 @@ export default {
   font-size: 1rem;
   font-weight: bold;
   text-align: center;
-  .avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-  }
+  user-select: none;
   .points {
     font-size: 18px;
     margin-top: 0.5rem;
     color: #999;
     transition: color 1s ease;
+    user-select: none;
   }
 }
 .player-scores {
   display: flex;
   flex-direction: column;
   height: 100%;
+  user-select: none;
 }
 .player-score {
   position: relative;
@@ -375,6 +384,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  user-select: none;
   &:hover {
     &:after {
       position: absolute;
@@ -407,6 +417,7 @@ export default {
   color: white;
   z-index: 100;
   overflow: hidden;
+  user-select: none;
 }
 .number {
   --border-color: rgb(36, 36, 36);
@@ -415,6 +426,7 @@ export default {
   justify-content: center;
   font-size: 18px;
   background-color: rgb(26, 26, 26);
+  user-select: none;
   &:hover {
     background-color: var(--border-color);
   }
@@ -445,11 +457,24 @@ export default {
   left: 100vw;
   top: 0;
 }
+input {
+  margin-top: 1rem;
+  font-size: 1rem;
+  -moz-appearance: none;
+  border-radius: 0.3rem;
+  padding: 0.8rem 1rem;
+  outline: none;
+  border: 0;
+}
 .button {
   -moz-appearance: none;
   background-color: white;
   border-radius: 0.3rem;
   padding: 0.8rem 1rem;
   margin-top: 2rem;
+  margin-right: 0.5rem;
+  &:last-of-type {
+    margin-right: 0;
+  }
 }
 </style>
