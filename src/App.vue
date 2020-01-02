@@ -134,6 +134,7 @@ export default {
           hit: false
         });
         this.newPlayer = "";
+        this.records.push(JSON.parse(JSON.stringify(this.players)));
       }
     },
     undo() {
@@ -258,9 +259,6 @@ export default {
       }
       this.records.push(JSON.parse(JSON.stringify(this.players)));
     }
-  },
-  mounted() {
-    this.records.push(JSON.parse(JSON.stringify(this.players)));
   }
 };
 </script>
