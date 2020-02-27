@@ -25,6 +25,7 @@
         v-bind="dragOptions"
         @start="drag = true"
         @end="drag = false"
+        handle=".name"
       >
         <transition-group
           class="flex"
