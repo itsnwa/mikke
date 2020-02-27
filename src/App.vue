@@ -20,53 +20,66 @@
       </div>
     </div>
     <div class="players">
-      <div
-        class="player"
-        :class="{ hit: player.hit }"
-        v-for="(player, playerIndex) in players"
-        :key="playerIndex"
+      <draggable
+        v-model="players"
+        v-bind="dragOptions"
+        @start="drag = true"
+        @end="drag = false"
       >
-        <div class="name">
-          {{ player.name }}
-          <div class="points">
-            {{ player.points }}
-          </div>
-        </div>
-        <div class="player-scores">
-          <div class="winning" v-if="player.finished">
-            <img src="./assets/winning.gif" />
-          </div>
+        <transition-group
+          class="flex"
+          type="transition"
+          :name="!drag ? 'flip-list' : null"
+        >
           <div
-            class="player-score"
-            v-for="(score, scoreIndex) in player.scores"
-            :key="scoreIndex"
-            @click="increaseScore(playerIndex, score, scoreIndex)"
+            class="player"
+            :class="{ hit: player.hit }"
+            v-for="(player, playerIndex) in players"
+            :key="player.name"
           >
-            <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
-              <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
-                d="M26 48.5333C38.4448 48.5333 48.5333 38.4448 48.5333 26C48.5333 13.5552 38.4448 3.46667 26 3.46667C13.5552 3.46667 3.46667 13.5552 3.46667 26C3.46667 38.4448 13.5552 48.5333 26 48.5333ZM26 52C40.3594 52 52 40.3594 52 26C52 11.6406 40.3594 0 26 0C11.6406 0 0 11.6406 0 26C0 40.3594 11.6406 52 26 52Z"
-                :fill="score >= 3 ? `white` : `transparent`"
-              />
-              <rect
-                width="4.08418"
-                height="40.8418"
-                rx="1"
-                transform="matrix(0.708377 -0.705834 0.708377 0.705834 10 13.1725)"
-                :fill="score >= 2 ? `white` : `transparent`"
-              />
-              <rect
-                width="4.08418"
-                height="40.8418"
-                rx="1"
-                transform="matrix(-0.708377 -0.705834 0.708377 -0.705834 13.0686 41.7103)"
-                :fill="score >= 1 ? `white` : `transparent`"
-              />
-            </svg>
+            <div class="name">
+              {{ player.name }}
+              <div class="points">
+                {{ player.points }}
+              </div>
+            </div>
+            <div class="player-scores">
+              <div class="winning" v-if="player.finished">
+                <img src="./assets/winning.gif" />
+              </div>
+              <div
+                class="player-score"
+                v-for="(score, scoreIndex) in player.scores"
+                :key="scoreIndex"
+                @click="increaseScore(playerIndex, score, scoreIndex)"
+              >
+                <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
+                  <path
+                    fill-rule="evenodd"
+                    clip-rule="evenodd"
+                    d="M26 48.5333C38.4448 48.5333 48.5333 38.4448 48.5333 26C48.5333 13.5552 38.4448 3.46667 26 3.46667C13.5552 3.46667 3.46667 13.5552 3.46667 26C3.46667 38.4448 13.5552 48.5333 26 48.5333ZM26 52C40.3594 52 52 40.3594 52 26C52 11.6406 40.3594 0 26 0C11.6406 0 0 11.6406 0 26C0 40.3594 11.6406 52 26 52Z"
+                    :fill="score >= 3 ? `white` : `transparent`"
+                  />
+                  <rect
+                    width="4.08418"
+                    height="40.8418"
+                    rx="1"
+                    transform="matrix(0.708377 -0.705834 0.708377 0.705834 10 13.1725)"
+                    :fill="score >= 2 ? `white` : `transparent`"
+                  />
+                  <rect
+                    width="4.08418"
+                    height="40.8418"
+                    rx="1"
+                    transform="matrix(-0.708377 -0.705834 0.708377 -0.705834 13.0686 41.7103)"
+                    :fill="score >= 1 ? `white` : `transparent`"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </transition-group>
+      </draggable>
     </div>
     <div class="add-new-player">
       <div class="label">New player name</div>
@@ -87,8 +100,12 @@
 </template>
 
 <script>
+import draggable from "vuedraggable";
 export default {
   name: "app",
+  components: {
+    draggable
+  },
   data() {
     return {
       records: [],
@@ -100,7 +117,8 @@ export default {
       isTriple: false,
       isDouble: false,
       notDonePlayers: null,
-      newPlayer: ""
+      newPlayer: "",
+      drag: false
     };
   },
   computed: {
@@ -110,6 +128,13 @@ export default {
       } else {
         return this.scoreValues;
       }
+    },
+    dragOptions() {
+      return {
+        animation: 200,
+        disabled: false,
+        ghostClass: "ghost"
+      };
     }
   },
   methods: {
@@ -324,7 +349,6 @@ export default {
   }
 }
 .players {
-  display: flex;
   height: 100vh;
   width: calc(100vw - 4rem);
   position: absolute;
@@ -332,11 +356,16 @@ export default {
   top: 0;
   user-select: none;
   padding: 0 0 env(safe-area-inset-bottom) 0;
+  .flex {
+    display: flex;
+    width: 100%;
+    height: 100vh;
+  }
 }
 .player {
   position: relative;
   flex: 1;
-  display: flex;
+  display: inline-flex;
   flex-direction: column;
   border-right: 1px solid #333;
   user-select: none;
@@ -490,5 +519,11 @@ input {
   &:last-of-type {
     margin-right: 0;
   }
+}
+.ghost {
+  opacity: 0;
+}
+.flip-list-move {
+  transition: transform 0.5s;
 }
 </style>
