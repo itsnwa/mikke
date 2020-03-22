@@ -153,9 +153,6 @@ export default {
     }
   },
   methods: {
-    newScore() {
-      console.log("score updated!")
-    },
     restartGame() {
       this.isTriple = false
       this.isDouble = false

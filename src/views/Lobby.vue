@@ -24,7 +24,6 @@ export default {
       // Make sure room name is not already taken
       const roomRefSnapshot = await roomRef.get()
       if (roomRefSnapshot.exists) {
-        console.log("Room name is already taken")
         return
       }
 
@@ -48,8 +47,6 @@ export default {
       if (roomRefSnapshot.data().password === this.newRoomPassword) {
         // Enter room
         this.$router.push(`/${this.newRoomName}`)
-      } else {
-        console.log("Incorrect password")
       }
     }
   }
