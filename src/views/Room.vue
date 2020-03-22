@@ -11,7 +11,7 @@
         <span v-else>{{ number }}</span>
       </div>
     </div>
-    <div class="undo" :class="{ disabled: records.length <= 1 }" @click="undo">
+    <div class="undo">
       Undo
     </div>
     <div class="scores">
@@ -21,10 +21,10 @@
     </div>
     <div class="players">
       <draggable
-        v-model="players"
+        v-model="room.players"
         v-bind="dragOptions"
         @start="drag = true"
-        @end="drag = false"
+        @end="endPlayerDrag"
         handle=".name"
       >
         <transition-group
@@ -34,7 +34,6 @@
         >
           <div
             class="player"
-            :class="{ hit: player.hit }"
             v-for="(player, playerIndex) in players"
             :key="player.name"
           >
@@ -102,6 +101,8 @@
 
 <script>
 import draggable from "vuedraggable"
+import firebase, { db } from "@/db"
+
 export default {
   name: "app",
   components: {
@@ -109,8 +110,7 @@ export default {
   },
   data() {
     return {
-      records: [],
-      players: [],
+      room: {},
       scores: ["20", "19", "18", "17", "16", "15", "14", "T", "D", "B"],
       scoreValues: [...Array(21).keys()].slice(1).reverse(),
       selectingNumber: false,
@@ -136,11 +136,27 @@ export default {
         disabled: false,
         ghostClass: "ghost"
       }
+    },
+    players() {
+      return this.room.players
+    }
+  },
+  watch: {
+    $route: {
+      immediate: true,
+      handler() {
+        this.$bind(
+          "room",
+          db.collection("rooms").doc(this.$route.params.roomID)
+        )
+      }
     }
   },
   methods: {
+    newScore() {
+      console.log("score updated!")
+    },
     restartGame() {
-      this.records = []
       this.isTriple = false
       this.isDouble = false
       this.notDonePlayers = null
@@ -148,36 +164,42 @@ export default {
         player.scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         player.points = 0
         player.finished = false
-        player.hit = false
+      })
+      this.$firestoreRefs.room.update({
+        players: this.players
       })
     },
     resetGame() {
       this.players = []
-      this.records = []
       this.selectingNumber = false
       this.selectedNumber = null
       this.isTriple = false
       this.isDouble = false
       this.notDonePlayers = null
+      this.$firestoreRefs.room.update({
+        players: []
+      })
+    },
+    leaveGame() {
+      // 1. This is where we delete the room if it's only one player left.
+      // 2. navigate to the lobby when leaving
     },
     addPlayer() {
       if (this.newPlayer.length >= 2) {
-        this.players.push({
+        const player = {
           name: this.newPlayer,
           scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
           points: 0,
-          finished: false,
-          hit: false
-        })
+          finished: false
+        }
+
         this.newPlayer = ""
-        this.records.push(JSON.parse(JSON.stringify(this.players)))
+        this.players.push(player)
+
+        this.$firestoreRefs.room.update({
+          players: this.players
+        })
       }
-    },
-    undo() {
-      this.records.pop()
-      this.players = JSON.parse(
-        JSON.stringify(this.records[this.records.length - 1])
-      )
     },
     setPoints(number) {
       this.isTriple ? this.scoreTriple(number) : this.scoreDouble(number)
@@ -186,10 +208,6 @@ export default {
       let points = number * 3
       this.notDonePlayers.forEach(player => {
         player.points += points
-        player.hit = true
-        setTimeout(() => {
-          player.hit = false
-        }, 1000)
       })
 
       this.players.forEach(player => {
@@ -206,6 +224,10 @@ export default {
         } else {
           player.finished = false
         }
+      })
+
+      this.$firestoreRefs.room.update({
+        players: this.players
       })
 
       this.selectingNumber = false
@@ -214,13 +236,6 @@ export default {
     },
     scoreDouble(number) {
       let points = number === 50 ? number : number * 2
-      this.notDonePlayers.forEach(player => {
-        player.points += points
-        player.hit = true
-        setTimeout(() => {
-          player.hit = false
-        }, 1000)
-      })
       this.players.forEach(player => {
         if (player.scores.every(score => score === 3)) {
           // Check if player has the least amount of points
@@ -236,12 +251,18 @@ export default {
           player.finished = false
         }
       })
+      this.notDonePlayers.forEach(player => {
+        player.points += points
+      })
+      this.$firestoreRefs.room.update({
+        players: this.players
+      })
       this.selectingNumber = false
       this.selectedNumber = null
       this.isDouble = false
     },
-    increaseScore(player, score, index) {
-      if (this.players[player].scores[index] === 3) {
+    increaseScore(playerIndex, score, index) {
+      if (this.players[playerIndex].scores[index] === 3) {
         // Check if other players are done, if not - give them points
         this.notDonePlayers = this.players.filter(
           player => player.scores[index] < 3
@@ -251,10 +272,6 @@ export default {
         if (index <= 6) {
           this.notDonePlayers.forEach(player => {
             player.points += this.scoreValues[index]
-            player.hit = true
-            setTimeout(() => {
-              player.hit = false
-            }, 1000)
           })
         } else if (index === 7) {
           // Triples
@@ -267,33 +284,35 @@ export default {
         } else {
           // Bull
           this.notDonePlayers.forEach(player => {
-            player.hit = true
-            setTimeout(() => {
-              player.hit = false
-            }, 2000)
             player.points += 25
           })
         }
-        this.$forceUpdate()
       } else {
-        this.players[player].scores[index] =
-          this.players[player].scores[index] + 1
-        this.$forceUpdate()
+        this.players[playerIndex].scores[index] =
+          this.players[playerIndex].scores[index] + 1
       }
-      if (this.players[player].scores.every(score => score === 3)) {
+      if (this.players[playerIndex].scores.every(score => score === 3)) {
         // Check if player has the least amount of points
         let pointsList = this.players.map(player => player.points)
         let lowScore = Math.min.apply(Math, pointsList)
         let scoreIndex = pointsList.indexOf(lowScore)
         let bestPlayer = this.players[scoreIndex]
 
-        if (bestPlayer.name === this.players[player].name) {
-          this.players[player].finished = true
+        if (bestPlayer.name === this.players[playerIndex].name) {
+          this.players[playerIndex].finished = true
         }
       } else {
-        this.players[player].finished = false
+        this.players[playerIndex].finished = false
       }
-      this.records.push(JSON.parse(JSON.stringify(this.players)))
+      this.$firestoreRefs.room.update({
+        players: this.players
+      })
+    },
+    endPlayerDrag() {
+      this.drag = false
+      this.$firestoreRefs.room.update({
+        players: this.players
+      })
     }
   }
 }

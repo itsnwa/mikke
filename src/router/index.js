@@ -1,12 +1,18 @@
 import Vue from "vue"
 import VueRouter from "vue-router"
-import Room from "../views/Room.vue"
+import Lobby from "../views/Lobby"
+import Room from "../views/Room"
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: "/",
+    name: "Lobby",
+    component: Lobby
+  },
+  {
+    path: "/:roomID",
     name: "Room",
     component: Room
   }
