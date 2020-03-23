@@ -384,8 +384,8 @@ export default {
   background-color: black;
   z-index: 10;
   .menu-content {
-    font-size: 3rem;
-    line-height: 2.5;
+    font-size: 2.5rem;
+    line-height: 2;
     padding: 4rem;
     span {
       display: block;

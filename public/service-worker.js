@@ -1,9 +1,9 @@
-const LATEST_VERSION = "0.1.7";
+const LATEST_VERSION = "0.2.0"
 
-workbox.core.setCacheNameDetails({ prefix: "d4" });
+workbox.core.setCacheNameDetails({ prefix: "d4" })
 //Change this value every time before you build
 self.addEventListener("activate", () => {
-  console.log(`%c ${LATEST_VERSION} `, "background: #ddd; color: #0000ff");
+  console.log(`%c ${LATEST_VERSION} `, "background: #ddd; color: #0000ff")
   if (caches) {
     caches.keys().then(arr => {
       arr.forEach(key => {
@@ -15,7 +15,7 @@ self.addEventListener("activate", () => {
                 `%c Cleared ${key}`,
                 "background: #333; color: #ff0000"
               )
-            );
+            )
         } else {
           caches.open(key).then(cache => {
             cache.match("version").then(res => {
@@ -26,7 +26,7 @@ self.addEventListener("activate", () => {
                     status: 200,
                     statusText: LATEST_VERSION
                   })
-                );
+                )
               } else if (res.statusText !== LATEST_VERSION) {
                 caches
                   .delete(key)
@@ -35,22 +35,22 @@ self.addEventListener("activate", () => {
                       `%c Cleared Cache ${LATEST_VERSION}`,
                       "background: #333; color: #ff0000"
                     )
-                  );
+                  )
               } else
                 console.log(
                   `%c Great you have the latest version ${LATEST_VERSION}`,
                   "background: #333; color: #00ff00"
-                );
-            });
-          });
+                )
+            })
+          })
         }
-      });
-    });
+      })
+    })
   }
-});
+})
 
-workbox.core.skipWaiting();
-workbox.core.clientsClaim();
+workbox.core.skipWaiting()
+workbox.core.clientsClaim()
 
-self.__precacheManifest = [].concat(self.__precacheManifest || []);
-workbox.precaching.precacheAndRoute(self.__precacheManifest, {});
+self.__precacheManifest = [].concat(self.__precacheManifest || [])
+workbox.precaching.precacheAndRoute(self.__precacheManifest, {})
