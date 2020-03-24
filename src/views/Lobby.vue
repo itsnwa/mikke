@@ -169,6 +169,7 @@ export default {
   max-width: 720px;
   min-height: 100vh;
   margin: 2rem auto;
+  padding: 0 2rem;
   h1 {
     margin: 0 0 4rem 0;
   }
