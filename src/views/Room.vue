@@ -19,10 +19,10 @@
         <img src="@/assets/times.svg" />
       </div>
       <div class="menu-content">
-        <span @click="undo">Undo</span>
-        <span @click="activateAddNewPlayer">Add player</span>
-        <span @click="restartGame">Restart game</span>
-        <span @click="leaveGame">Leave game</span>
+        <span class="menu-item" @click="undo">Undo</span>
+        <span class="menu-item" @click="activateAddNewPlayer">Add player</span>
+        <span class="menu-item" @click="restartGame">Restart game</span>
+        <span class="menu-item" @click="leaveGame">Leave game</span>
       </div>
     </div>
     <div class="scores">
@@ -367,6 +367,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   &.disabled {
     color: #333;
     pointer-events: none;
@@ -385,11 +386,17 @@ export default {
   z-index: 10;
   .menu-content {
     font-size: 2.5rem;
-    line-height: 2;
+    line-height: 1.35;
     padding: 4rem;
     span {
       display: block;
     }
+  }
+  .menu-item {
+    display: block;
+    margin-bottom: 2rem;
+    user-select: none;
+    cursor: pointer;
   }
   .close-menu {
     position: absolute;
@@ -403,6 +410,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+    cursor: pointer;
     &.disabled {
       color: #333;
       pointer-events: none;
