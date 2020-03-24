@@ -197,6 +197,7 @@ export default {
     border-radius: 6px;
     border: 0;
     margin-top: 2rem;
+    background: white;
   }
   button.cancel {
     background: transparent;
