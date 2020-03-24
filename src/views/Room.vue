@@ -528,6 +528,7 @@ export default {
   align-items: center;
   justify-content: center;
   user-select: none;
+  // TODO: This one is causing overflow
   &:hover {
     &:after {
       position: absolute;

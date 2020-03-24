@@ -15,22 +15,32 @@
       </div>
     </div>
     <div class="form" v-if="newRoomFormActive">
-      <label>New room name</label>
+      <h1>Create new room</h1>
+      <label>Room name</label>
       <input type="text" v-model="newRoomName" placeholder="Room name" />
-      <input type="text" v-model="newRoomPassword" placeholder="optional" />
+      <label>Password <span>(optional)</span></label>
+      <input type="text" v-model="newRoomPassword" placeholder="Password" />
       <button @click.prevent="createRoom">Create room</button>
-      <button @click.prevent="cancel">Cancel</button>
+      <button class="cancel" @click.prevent="cancel">Cancel</button>
     </div>
     <div class="form" v-if="existingRoomFormActive">
+      <h1>Join room</h1>
       <label>Room name</label>
       <input type="text" v-model="existingRoomName" placeholder="Room name" />
-      <button @click.prevent="joinRoom">Join room</button>
-      <button @click.prevent="cancel">Cancel</button>
-    </div>
-    <div class="form" v-if="passwordPromptActive">
-      <label>Enter password</label>
-      <input type="text" v-model="existingRoomPassword" />
-      <button @click.prevent="joinWithPassword">Let me in!</button>
+      <div class="password-form" v-if="passwordPromptActive">
+        <label style="color:red;">Password required</label>
+        <input
+          type="text"
+          v-model="existingRoomPassword"
+          placeholder="Password"
+        />
+      </div>
+      <button
+        @click.prevent="passwordPromptActive ? joinWithPassword() : joinRoom()"
+      >
+        Join room
+      </button>
+      <button class="cancel" @click.prevent="cancel">Cancel</button>
     </div>
   </div>
 </template>
@@ -149,6 +159,52 @@ export default {
   }
   &:hover {
     background-color: #141414;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  max-width: 720px;
+  min-height: 100vh;
+  margin: 2rem auto;
+  h1 {
+    margin: 0 0 4rem 0;
+  }
+  label {
+    display: block;
+    margin: 0 0 1rem 0;
+    span {
+      opacity: 0.4;
+    }
+  }
+  input {
+    display: block;
+    width: 100%;
+    margin: 0 0 2rem 0;
+    font-size: 1rem;
+    padding: 0.8rem 1rem;
+    -moz-appearance: none;
+    border-radius: 6px;
+    border: 0;
+    background-color: #333;
+    color: white;
+  }
+  button {
+    padding: 1rem;
+    font-size: 0.8rem;
+    border-radius: 6px;
+    border: 0;
+    margin-top: 2rem;
+  }
+  button.cancel {
+    background: transparent;
+    border: 0;
+    color: white;
+    padding: 1rem;
+    font-size: 0.8rem;
+    margin: 0;
   }
 }
 </style>
