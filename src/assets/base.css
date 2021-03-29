@@ -7,8 +7,8 @@
 }
 
 :root {
-  --bg-color: hsl(240, 6%, 7%);
-  --border-color: hsl(240, 4%, 10%);
+  --bg-color: hsl(0, 0%, 0%);
+  --border-color: hsl(0, 0%, 15%);
   --header-height: 72px;
 }
 

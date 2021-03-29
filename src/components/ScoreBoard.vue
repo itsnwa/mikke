@@ -41,7 +41,7 @@
         v-bind="dragOptions"
         @start="drag = true"
         @end="drag = false"
-        handle=".name"
+        handle=".drag-handle"
       >
         <transition-group
           class="flex"
@@ -64,6 +64,18 @@
               {{ player.name }}
               <div class="points" :class="{ blank: player.points === 0 }">
                 {{ player.points }}
+              </div>
+              <div class="drag-handle">
+                <svg
+                  width="13"
+                  height="8"
+                  viewBox="0 0 13 8"
+                  fill="white"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect x="0.755859" width="12" height="2" rx="1" />
+                  <rect x="0.755859" y="6" width="12" height="2" rx="1" />
+                </svg>
               </div>
             </div>
             <div class="player-scores">
@@ -433,6 +445,7 @@ export default {
   }
 }
 .name {
+  position: relative;
   flex: 0 0 var(--header-height);
   border-bottom: 1px solid var(--border-color);
   display: flex;
@@ -452,6 +465,15 @@ export default {
     user-select: none;
     &.blank {
       color: rgb(56, 56, 61);
+    }
+  }
+  .drag-handle {
+    position: absolute;
+    top: 2px;
+    left: 0px;
+    padding: 12px;
+    svg {
+      opacity: 0.2;
     }
   }
 }
