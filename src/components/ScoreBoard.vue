@@ -378,6 +378,7 @@ export default {
   display: flex;
   flex-direction: column;
   user-select: none;
+  pointer-events: none;
   padding: 0 0 env(safe-area-inset-bottom) 0;
 }
 .score {
@@ -508,7 +509,7 @@ export default {
     }
   }
   &:last-of-type {
-    border: 0;
+    border-bottom: 0;
   }
   svg {
     width: 2rem;
