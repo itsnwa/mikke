@@ -52,28 +52,18 @@
             class="player"
             :class="{
               hit: player.hit,
-              playing: playerIndex === currentPlayer
+              playing: player.isPlaying
             }"
             v-for="(player, playerIndex) in players"
             :key="player.name"
           >
-            <div class="name">
+            <div
+              class="name"
+              @click="player.isPlaying ? null : selectPlayer(playerIndex)"
+            >
               {{ player.name }}
               <div class="points" :class="{ blank: player.points === 0 }">
                 {{ player.points }}
-              </div>
-              <div class="next-player" v-if="playerIndex === currentPlayer">
-                <svg
-                  width="16"
-                  height="17"
-                  viewBox="0 0 16 17"
-                  fill="white"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M8.01562 16.3594C12.2266 16.3594 15.7031 12.8828 15.7031 8.66406C15.7031 4.45312 12.2188 0.976562 8.00781 0.976562C3.79688 0.976562 0.320312 4.45312 0.320312 8.66406C0.320312 12.8828 3.79688 16.3594 8.01562 16.3594ZM12.0078 8.66406C12.0078 8.90625 11.9141 9.08594 11.7266 9.26562L9.10156 11.8281C8.96094 11.9688 8.80469 12.0312 8.60156 12.0312C8.21875 12.0312 7.94531 11.7422 7.94531 11.3516C7.94531 11.1562 8.02344 10.9688 8.16406 10.8516L9.07812 9.99219L9.91406 9.33594L8.35156 9.41406H4.72656C4.29688 9.41406 4 9.09375 4 8.66406C4 8.22656 4.30469 7.90625 4.72656 7.90625H8.35156L9.90625 7.99219L9.0625 7.33594L8.16406 6.46875C8.03125 6.35156 7.94531 6.16406 7.94531 5.96875C7.94531 5.57812 8.21875 5.29688 8.60156 5.29688C8.80469 5.29688 8.96094 5.35156 9.10156 5.5L11.7266 8.0625C11.9219 8.24219 12.0078 8.42969 12.0078 8.66406Z"
-                  />
-                </svg>
               </div>
             </div>
             <div class="player-scores">
@@ -84,7 +74,11 @@
                 class="player-score"
                 v-for="(score, scoreIndex) in player.scores"
                 :key="scoreIndex"
-                @click="increaseScore(playerIndex, score, scoreIndex)"
+                @click="
+                  player.isPlaying
+                    ? increaseScore(playerIndex, score, scoreIndex)
+                    : null
+                "
               >
                 <svg width="52" height="52" viewBox="0 0 52 52" fill="none">
                   <path
@@ -145,7 +139,6 @@ export default {
       players: [],
       scores: ["20", "19", "18", "17", "16", "15", "14", "T", "D", "B"],
       scoreValues: [...Array(21).keys()].slice(1).reverse(),
-      currentPlayer: 0,
       selectingNumber: false,
       selectedNumber: null,
       isTriple: false,
@@ -200,7 +193,8 @@ export default {
           scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
           points: 0,
           finished: false,
-          hit: false
+          hit: false,
+          isPlaying: false
         })
         this.newPlayer = ""
         this.records.push(JSON.parse(JSON.stringify(this.players)))
@@ -328,11 +322,15 @@ export default {
       }
       this.records.push(JSON.parse(JSON.stringify(this.players)))
     },
-    nextPlayer() {
-      if (this.currentPlayer < this.players.length) {
-        this.currentPlayer++
+    selectPlayer(index) {
+      const prevPlayer = this.players.find(player => player.isPlaying)
+      if (prevPlayer) {
+        prevPlayer.isPlaying = false
+        this.players[index].isPlaying = true
+        this.records.push(JSON.parse(JSON.stringify(this.players)))
       } else {
-        this.currentPlayer = 0
+        this.players[index].isPlaying = true
+        this.records.push(JSON.parse(JSON.stringify(this.players)))
       }
     }
   }
