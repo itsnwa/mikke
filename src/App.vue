@@ -1,8 +1,16 @@
 <template>
   <div id="app">
-    <router-view />
+    <ScoreBoard />
   </div>
 </template>
+
+<script>
+import ScoreBoard from "@/components/ScoreBoard.vue"
+
+export default {
+  components: { ScoreBoard }
+}
+</script>
 
 <style lang="scss">
 #app {

@@ -1,5 +1,5 @@
 <template>
-  <div class="game-view">
+  <div id="app">
     <div class="number-picker" v-if="selectingNumber">
       <div
         class="number"
@@ -11,19 +11,8 @@
         <span v-else>{{ number }}</span>
       </div>
     </div>
-    <div class="menu-toggle" @click="toggleMenu">
-      <img src="@/assets/dartboard.svg" />
-    </div>
-    <div class="menu" v-if="menuOpen">
-      <div class="close-menu" @click="toggleMenu">
-        <img src="@/assets/times.svg" />
-      </div>
-      <div class="menu-content">
-        <span class="menu-item" @click="undo">Undo</span>
-        <span class="menu-item" @click="activateAddNewPlayer">Add player</span>
-        <span class="menu-item" @click="restartGame">Restart game</span>
-        <span class="menu-item" @click="leaveGame">Leave game</span>
-      </div>
+    <div class="undo" :class="{ disabled: records.length <= 1 }" @click="undo">
+      Undo
     </div>
     <div class="scores">
       <div class="score" v-for="(score, index) in scores" :key="index">
@@ -32,10 +21,10 @@
     </div>
     <div class="players">
       <draggable
-        v-model="room.players"
+        v-model="players"
         v-bind="dragOptions"
         @start="drag = true"
-        @end="endPlayerDrag"
+        @end="drag = false"
         handle=".name"
       >
         <transition-group
@@ -45,6 +34,7 @@
         >
           <div
             class="player"
+            :class="{ hit: player.hit }"
             v-for="(player, playerIndex) in players"
             :key="player.name"
           >
@@ -52,9 +42,6 @@
               {{ player.name }}
               <div class="points">
                 {{ player.points }}
-              </div>
-              <div class="remove-player" @click="removePlayer(playerIndex)">
-                <img src="@/assets/times.svg" />
               </div>
             </div>
             <div class="player-scores">
@@ -95,28 +82,26 @@
         </transition-group>
       </draggable>
     </div>
-    <div class="bottom-controller" v-if="addNewPlayerPanelActive">
-      <input
-        type="text"
-        v-model="newPlayer"
-        @keyup.enter="addPlayer"
-        placeholder="name"
-      />
+    <div class="add-new-player">
+      <div class="label">New player name</div>
+      <input type="text" v-model="newPlayer" />
       <button
         class="button"
         :disabled="newPlayer.length < 2"
         @click="addPlayer"
       >
-        Add new player
+        Add
       </button>
+      <div class="game-controller">
+        <button class="button" @click="restartGame">Restart game</button>
+        <button class="button" @click="resetGame">Reset</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
 import draggable from "vuedraggable"
-import firebase, { db } from "@/db"
-
 export default {
   name: "app",
   components: {
@@ -124,7 +109,8 @@ export default {
   },
   data() {
     return {
-      room: {},
+      records: [],
+      players: [],
       scores: ["20", "19", "18", "17", "16", "15", "14", "T", "D", "B"],
       scoreValues: [...Array(21).keys()].slice(1).reverse(),
       selectingNumber: false,
@@ -132,10 +118,8 @@ export default {
       isTriple: false,
       isDouble: false,
       notDonePlayers: null,
-      addNewPlayerPanelActive: false,
       newPlayer: "",
-      drag: false,
-      menuOpen: false
+      drag: false
     }
   },
   computed: {
@@ -152,35 +136,11 @@ export default {
         disabled: false,
         ghostClass: "ghost"
       }
-    },
-    players() {
-      return this.room.players
-    }
-  },
-  watch: {
-    $route: {
-      immediate: true,
-      handler() {
-        this.$bind(
-          "room",
-          db.collection("rooms").doc(this.$route.params.roomID)
-        )
-      }
     }
   },
   methods: {
-    toggleMenu() {
-      this.menuOpen = !this.menuOpen
-    },
-    leaveGame() {
-      this.menuOpen = false
-      this.$router.push("/")
-    },
-    undo() {
-      this.menuOpen = false
-    },
     restartGame() {
-      this.menuOpen = false
+      this.records = []
       this.isTriple = false
       this.isDouble = false
       this.notDonePlayers = null
@@ -188,50 +148,36 @@ export default {
         player.scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         player.points = 0
         player.finished = false
-      })
-      this.$firestoreRefs.room.update({
-        players: this.players
+        player.hit = false
       })
     },
     resetGame() {
       this.players = []
+      this.records = []
       this.selectingNumber = false
       this.selectedNumber = null
       this.isTriple = false
       this.isDouble = false
       this.notDonePlayers = null
-      this.$firestoreRefs.room.update({
-        players: []
-      })
-    },
-    activateAddNewPlayer() {
-      this.menuOpen = false
-      this.newPlayer = ""
-      this.addNewPlayerPanelActive = true
     },
     addPlayer() {
       if (this.newPlayer.length >= 2) {
-        const player = {
+        this.players.push({
           name: this.newPlayer,
           scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
           points: 0,
-          finished: false
-        }
-
-        this.newPlayer = ""
-        this.addNewPlayerPanelActive = false
-        this.players.push(player)
-
-        this.$firestoreRefs.room.update({
-          players: this.players
+          finished: false,
+          hit: false
         })
+        this.newPlayer = ""
+        this.records.push(JSON.parse(JSON.stringify(this.players)))
       }
     },
-    removePlayer(playerIndex) {
-      this.players.splice(playerIndex, 1)
-      this.$firestoreRefs.room.update({
-        players: this.players
-      })
+    undo() {
+      this.records.pop()
+      this.players = JSON.parse(
+        JSON.stringify(this.records[this.records.length - 1])
+      )
     },
     setPoints(number) {
       this.isTriple ? this.scoreTriple(number) : this.scoreDouble(number)
@@ -240,6 +186,10 @@ export default {
       let points = number * 3
       this.notDonePlayers.forEach(player => {
         player.points += points
+        player.hit = true
+        setTimeout(() => {
+          player.hit = false
+        }, 1000)
       })
 
       this.players.forEach(player => {
@@ -256,10 +206,6 @@ export default {
         } else {
           player.finished = false
         }
-      })
-
-      this.$firestoreRefs.room.update({
-        players: this.players
       })
 
       this.selectingNumber = false
@@ -268,6 +214,13 @@ export default {
     },
     scoreDouble(number) {
       let points = number === 50 ? number : number * 2
+      this.notDonePlayers.forEach(player => {
+        player.points += points
+        player.hit = true
+        setTimeout(() => {
+          player.hit = false
+        }, 1000)
+      })
       this.players.forEach(player => {
         if (player.scores.every(score => score === 3)) {
           // Check if player has the least amount of points
@@ -283,18 +236,12 @@ export default {
           player.finished = false
         }
       })
-      this.notDonePlayers.forEach(player => {
-        player.points += points
-      })
-      this.$firestoreRefs.room.update({
-        players: this.players
-      })
       this.selectingNumber = false
       this.selectedNumber = null
       this.isDouble = false
     },
-    increaseScore(playerIndex, score, index) {
-      if (this.players[playerIndex].scores[index] === 3) {
+    increaseScore(player, score, index) {
+      if (this.players[player].scores[index] === 3) {
         // Check if other players are done, if not - give them points
         this.notDonePlayers = this.players.filter(
           player => player.scores[index] < 3
@@ -304,6 +251,10 @@ export default {
         if (index <= 6) {
           this.notDonePlayers.forEach(player => {
             player.points += this.scoreValues[index]
+            player.hit = true
+            setTimeout(() => {
+              player.hit = false
+            }, 1000)
           })
         } else if (index === 7) {
           // Triples
@@ -316,46 +267,46 @@ export default {
         } else {
           // Bull
           this.notDonePlayers.forEach(player => {
+            player.hit = true
+            setTimeout(() => {
+              player.hit = false
+            }, 2000)
             player.points += 25
           })
         }
+        this.$forceUpdate()
       } else {
-        this.players[playerIndex].scores[index] =
-          this.players[playerIndex].scores[index] + 1
+        this.players[player].scores[index] =
+          this.players[player].scores[index] + 1
+        this.$forceUpdate()
       }
-      if (this.players[playerIndex].scores.every(score => score === 3)) {
+      if (this.players[player].scores.every(score => score === 3)) {
         // Check if player has the least amount of points
         let pointsList = this.players.map(player => player.points)
         let lowScore = Math.min.apply(Math, pointsList)
         let scoreIndex = pointsList.indexOf(lowScore)
         let bestPlayer = this.players[scoreIndex]
 
-        if (bestPlayer.name === this.players[playerIndex].name) {
-          this.players[playerIndex].finished = true
+        if (bestPlayer.name === this.players[player].name) {
+          this.players[player].finished = true
         }
       } else {
-        this.players[playerIndex].finished = false
+        this.players[player].finished = false
       }
-      this.$firestoreRefs.room.update({
-        players: this.players
-      })
-    },
-    endPlayerDrag() {
-      this.drag = false
-      this.$firestoreRefs.room.update({
-        players: this.players
-      })
+      this.records.push(JSON.parse(JSON.stringify(this.players)))
     }
   }
 }
 </script>
 
-<style lang="scss" scoped>
-.game-view {
+<style lang="scss">
+#app {
+  position: relative;
+  height: 100vh;
   width: 100vw;
-  overflow: hidden;
+  overflow-x: auto;
 }
-.menu-toggle {
+.undo {
   position: absolute;
   left: 0;
   top: 0;
@@ -367,54 +318,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   &.disabled {
     color: #333;
     pointer-events: none;
-  }
-}
-.menu {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  background-color: black;
-  z-index: 10;
-  .menu-content {
-    font-size: 2.5rem;
-    line-height: 1.35;
-    padding: 4rem;
-    span {
-      display: block;
-    }
-  }
-  .menu-item {
-    display: block;
-    margin-bottom: 2rem;
-    user-select: none;
-    cursor: pointer;
-  }
-  .close-menu {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 4rem;
-    height: 6rem;
-    border-bottom: 1px solid #333;
-    border-right: 1px solid #333;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    &.disabled {
-      color: #333;
-      pointer-events: none;
-    }
   }
 }
 .scores {
@@ -451,7 +357,6 @@ export default {
   top: 0;
   user-select: none;
   padding: 0 0 env(safe-area-inset-bottom) 0;
-  overflow-x: auto;
   .flex {
     display: flex;
     width: 100%;
@@ -460,12 +365,11 @@ export default {
 }
 .player {
   position: relative;
-  flex: 1 0 150px;
+  flex: 1;
   display: inline-flex;
   flex-direction: column;
   border-right: 1px solid #333;
   user-select: none;
-  transition: flex 1s;
   &.hit {
     .name {
       background-color: rgb(236, 84, 73);
@@ -510,17 +414,6 @@ export default {
     transition: color 1s ease;
     user-select: none;
   }
-  .remove-player {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 1rem;
-    height: 1rem;
-    img {
-      max-width: 100%;
-      opacity: 0.4;
-    }
-  }
 }
 .player-scores {
   display: flex;
@@ -536,7 +429,6 @@ export default {
   align-items: center;
   justify-content: center;
   user-select: none;
-  // TODO: This one is causing overflow
   &:hover {
     &:after {
       position: absolute;
@@ -598,33 +490,33 @@ export default {
     border-bottom: 1px solid var(--border-color);
   }
 }
-.bottom-controller {
-  width: 100vw;
-  position: absolute;
-  left: 0;
-  bottom: 0;
+.add-new-player {
   display: flex;
   flex-direction: column;
-  background-color: black;
-  border-top: 1px solid #333;
-  padding: 1rem;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  left: 100vw;
+  top: 0;
 }
 input {
+  margin-top: 1rem;
   font-size: 1rem;
   -moz-appearance: none;
-  background-color: #333;
-  color: white;
   border-radius: 0.3rem;
-  border: 0;
   padding: 0.8rem 1rem;
-  margin-bottom: 1rem;
   outline: none;
+  border: 0;
 }
 .button {
   -moz-appearance: none;
   background-color: white;
   border-radius: 0.3rem;
   padding: 0.8rem 1rem;
+  margin-top: 2rem;
+  margin-right: 0.5rem;
   &:last-of-type {
     margin-right: 0;
   }
