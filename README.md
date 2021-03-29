@@ -5,8 +5,9 @@ Simple scoring app for the darts game "Mickey Mouse". This is still WIP, a few i
 To access the settings screen, scroll to the right.
 
 ### Todo
+
 - [x] Add players to the line-up
-- [ ] Remove players from the line-up
+- [x] Remove players from the line-up
 - [ ] Design logo and set it as favicon and touch icons
 - [ ] Snap to the offset settings screen instead of normal scroll behavior
 - [ ] List all the players vertically in the settings screen

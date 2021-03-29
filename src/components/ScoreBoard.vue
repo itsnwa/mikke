@@ -1,18 +1,34 @@
 <template>
   <div id="app">
-    <div class="number-picker" v-if="selectingNumber">
-      <div
-        class="number"
-        v-for="(number, index) in pointValues"
-        :key="index"
-        @click="setPoints(number)"
-      >
-        <span v-if="number === 50">Bull (50)</span>
-        <span v-else>{{ number }}</span>
+    <div
+      class="number-picker"
+      v-if="selectingNumber"
+      @click="selectingNumber = false"
+    >
+      <div class="number-picker--card">
+        <div
+          class="number"
+          v-for="(number, index) in pointValues"
+          :key="index"
+          @click="setPoints(number)"
+        >
+          <span v-if="number === 50">Bull (50)</span>
+          <span v-else>{{ number }}</span>
+        </div>
       </div>
     </div>
     <div class="undo" :class="{ disabled: records.length <= 1 }" @click="undo">
-      Undo
+      <svg
+        width="16"
+        height="15"
+        viewBox="0 0 16 15"
+        fill="white"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M15.1484 9.42969C15.1484 6.4375 13.125 4.375 9.78125 4.375H5.28906L3.59375 4.44531L4.83594 3.40625L6.60156 1.6875C6.76562 1.52344 6.86719 1.32812 6.86719 1.05469C6.86719 0.5625 6.52344 0.195312 5.99219 0.195312C5.77344 0.195312 5.52344 0.296875 5.35156 0.46875L1.16406 4.60156C0.984375 4.77344 0.882812 5.02344 0.882812 5.26562C0.882812 5.50781 0.984375 5.75781 1.16406 5.92969L5.35156 10.0625C5.52344 10.2344 5.77344 10.3359 5.99219 10.3359C6.52344 10.3359 6.86719 9.96875 6.86719 9.46875C6.86719 9.20312 6.76562 9.00781 6.60156 8.84375L4.83594 7.125L3.59375 6.08594L5.28906 6.16406H9.78906C12.0781 6.16406 13.3828 7.49219 13.3828 9.375C13.3828 11.2656 12.0781 12.6328 9.78906 12.6328H8.04688C7.51562 12.6328 7.14062 13.0391 7.14062 13.5312C7.14062 14.0234 7.51562 14.4297 8.04688 14.4297H9.86719C13.1641 14.4297 15.1484 12.4531 15.1484 9.42969Z"
+        />
+      </svg>
     </div>
     <div class="scores">
       <div class="score" v-for="(score, index) in scores" :key="index">
@@ -34,14 +50,30 @@
         >
           <div
             class="player"
-            :class="{ hit: player.hit }"
+            :class="{
+              hit: player.hit,
+              playing: playerIndex === currentPlayer
+            }"
             v-for="(player, playerIndex) in players"
             :key="player.name"
           >
             <div class="name">
               {{ player.name }}
-              <div class="points">
+              <div class="points" :class="{ blank: player.points === 0 }">
                 {{ player.points }}
+              </div>
+              <div class="next-player" v-if="playerIndex === currentPlayer">
+                <svg
+                  width="16"
+                  height="17"
+                  viewBox="0 0 16 17"
+                  fill="white"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M8.01562 16.3594C12.2266 16.3594 15.7031 12.8828 15.7031 8.66406C15.7031 4.45312 12.2188 0.976562 8.00781 0.976562C3.79688 0.976562 0.320312 4.45312 0.320312 8.66406C0.320312 12.8828 3.79688 16.3594 8.01562 16.3594ZM12.0078 8.66406C12.0078 8.90625 11.9141 9.08594 11.7266 9.26562L9.10156 11.8281C8.96094 11.9688 8.80469 12.0312 8.60156 12.0312C8.21875 12.0312 7.94531 11.7422 7.94531 11.3516C7.94531 11.1562 8.02344 10.9688 8.16406 10.8516L9.07812 9.99219L9.91406 9.33594L8.35156 9.41406H4.72656C4.29688 9.41406 4 9.09375 4 8.66406C4 8.22656 4.30469 7.90625 4.72656 7.90625H8.35156L9.90625 7.99219L9.0625 7.33594L8.16406 6.46875C8.03125 6.35156 7.94531 6.16406 7.94531 5.96875C7.94531 5.57812 8.21875 5.29688 8.60156 5.29688C8.80469 5.29688 8.96094 5.35156 9.10156 5.5L11.7266 8.0625C11.9219 8.24219 12.0078 8.42969 12.0078 8.66406Z"
+                  />
+                </svg>
               </div>
             </div>
             <div class="player-scores">
@@ -113,6 +145,7 @@ export default {
       players: [],
       scores: ["20", "19", "18", "17", "16", "15", "14", "T", "D", "B"],
       scoreValues: [...Array(21).keys()].slice(1).reverse(),
+      currentPlayer: 0,
       selectingNumber: false,
       selectedNumber: null,
       isTriple: false,
@@ -294,41 +327,44 @@ export default {
         this.players[player].finished = false
       }
       this.records.push(JSON.parse(JSON.stringify(this.players)))
+    },
+    nextPlayer() {
+      if (this.currentPlayer < this.players.length) {
+        this.currentPlayer++
+      } else {
+        this.currentPlayer = 0
+      }
     }
   }
 }
 </script>
 
 <style lang="scss">
-#app {
-  position: relative;
-  height: 100vh;
-  width: 100vw;
-  overflow-x: auto;
-}
 .undo {
   position: absolute;
   left: 0;
   top: 0;
   width: 4rem;
-  height: 6rem;
-  border-bottom: 1px solid #333;
-  border-right: 1px solid #333;
-  font-size: 16px;
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
+  user-select: none;
   &.disabled {
-    color: #333;
     pointer-events: none;
+    svg {
+      opacity: 0.4;
+    }
   }
 }
 .scores {
   position: absolute;
   left: 0;
-  top: 6rem;
+  top: var(--header-height);
   width: 4rem;
-  height: calc(100vh - 6rem);
+  height: calc(100vh - var(--header-height));
   display: flex;
   flex-direction: column;
   user-select: none;
@@ -339,8 +375,8 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid #333;
-  border-right: 1px solid #333;
+  border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
   line-height: 0;
   font-size: 1.2rem;
   font-weight: bold;
@@ -368,7 +404,7 @@ export default {
   flex: 1;
   display: inline-flex;
   flex-direction: column;
-  border-right: 1px solid #333;
+  border-right: 1px solid var(--border-color);
   user-select: none;
   &.hit {
     .name {
@@ -378,8 +414,11 @@ export default {
       color: white;
     }
   }
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+  &.playing {
+    background-color: hsla(0, 0%, 100%, 0.06);
+    .name {
+      color: rgb(43, 255, 156);
+    }
   }
   &:last-of-type {
     border: 0;
@@ -396,8 +435,8 @@ export default {
   }
 }
 .name {
-  flex: 0 0 6rem;
-  border-bottom: 1px solid #333;
+  flex: 0 0 var(--header-height);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -408,11 +447,14 @@ export default {
   user-select: none;
   transition: background-color 1s ease;
   .points {
-    font-size: 18px;
-    margin-top: 0.5rem;
-    color: #999;
+    font-weight: normal;
+    margin-top: 0.25rem;
+    color: rgb(135, 135, 146);
     transition: color 1s ease;
     user-select: none;
+    &.blank {
+      color: rgb(56, 56, 61);
+    }
   }
 }
 .player-scores {
@@ -424,7 +466,7 @@ export default {
 .player-score {
   position: relative;
   flex: 1;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -449,6 +491,16 @@ export default {
   }
 }
 .number-picker {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: hsla(0, 0, 0%, 0.9);
+  z-index: 1000;
+}
+
+.number-picker--card {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   position: fixed;
@@ -463,13 +515,14 @@ export default {
   overflow: hidden;
   user-select: none;
 }
+
 .number {
   --border-color: rgb(36, 36, 36);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  background-color: rgb(26, 26, 26);
+  background-color: var(--bg-color);
   user-select: none;
   &:hover {
     background-color: var(--border-color);
