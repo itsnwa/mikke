@@ -61,10 +61,6 @@
               class="name"
               @click="player.isPlaying ? null : selectPlayer(playerIndex)"
             >
-              {{ player.name }}
-              <div class="points" :class="{ blank: player.points === 0 }">
-                {{ player.points }}
-              </div>
               <div class="drag-handle">
                 <svg
                   width="13"
@@ -76,6 +72,10 @@
                   <rect x="0.755859" width="12" height="2" rx="1" />
                   <rect x="0.755859" y="6" width="12" height="2" rx="1" />
                 </svg>
+              </div>
+              {{ player.name }}
+              <div class="points" :class="{ blank: player.points === 0 }">
+                {{ player.points }}
               </div>
             </div>
             <div class="player-scores">
@@ -388,7 +388,8 @@ export default {
   border-bottom: 1px solid var(--border-color);
   border-right: 1px solid var(--border-color);
   line-height: 0;
-  font-size: 1.2rem;
+  font-size: 1rem;
+  min-height: 2.06rem;
   font-weight: bold;
   user-select: none;
   &:last-of-type {
@@ -414,7 +415,6 @@ export default {
   flex: 1;
   display: inline-flex;
   flex-direction: column;
-  border-right: 1px solid var(--border-color);
   user-select: none;
   &.hit {
     .name {
@@ -431,7 +431,12 @@ export default {
     }
   }
   &:last-of-type {
-    border: 0;
+    .name {
+      border-right: 0;
+    }
+    .player-score {
+      border-right: 0;
+    }
   }
 }
 .winning {
@@ -457,6 +462,7 @@ export default {
   text-align: center;
   user-select: none;
   transition: background-color 1s ease;
+  border-right: 1px solid var(--border-color);
   .points {
     font-weight: normal;
     margin-top: 0.25rem;
@@ -468,25 +474,24 @@ export default {
     }
   }
   .drag-handle {
-    position: absolute;
-    top: 2px;
-    left: 0px;
-    padding: 12px;
+    margin-top: -12px;
+    padding-bottom: 4px;
     svg {
-      opacity: 0.2;
+      opacity: 0.1;
     }
   }
 }
 .player-scores {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(100vh - var(--header-height));
   user-select: none;
 }
 .player-score {
   position: relative;
   flex: 1;
   border-bottom: 1px solid var(--border-color);
+  border-right: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: center;

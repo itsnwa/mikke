@@ -9,7 +9,7 @@
 :root {
   --bg-color: hsl(0, 0%, 0%);
   --border-color: hsl(0, 0%, 15%);
-  --header-height: 72px;
+  --header-height: 88px;
 }
 
 html {
