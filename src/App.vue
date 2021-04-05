@@ -18,5 +18,6 @@ export default {
   height: 100vh;
   width: 100vw;
   overflow-x: auto;
+  touch-action: pan-x;
 }
 </style>

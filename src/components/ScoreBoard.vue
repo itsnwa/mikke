@@ -380,6 +380,7 @@ export default {
   user-select: none;
   pointer-events: none;
   padding: 0 0 env(safe-area-inset-bottom) 0;
+  touch-action: none;
 }
 .score {
   flex: 1;
