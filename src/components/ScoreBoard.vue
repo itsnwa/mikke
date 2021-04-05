@@ -487,6 +487,7 @@ export default {
   flex-direction: column;
   height: calc(100vh - var(--header-height));
   user-select: none;
+  touch-action: pan-x;
 }
 .player-score {
   position: relative;
