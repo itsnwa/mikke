@@ -156,6 +156,7 @@ export default {
       isTriple: false,
       isDouble: false,
       notDonePlayers: null,
+      gameFinshed: false,
       newPlayer: "",
       drag: false
     }
@@ -206,13 +207,14 @@ export default {
           points: 0,
           finished: false,
           hit: false,
-          isPlaying: false
+          isPlaying: this.players.length <= 0 ? true : false
         })
         this.newPlayer = ""
         this.records.push(JSON.parse(JSON.stringify(this.players)))
       }
     },
     undo() {
+      this.gameFinshed = false
       this.records.pop()
       this.players = JSON.parse(
         JSON.stringify(this.records[this.records.length - 1])
@@ -326,8 +328,16 @@ export default {
         let scoreIndex = pointsList.indexOf(lowScore)
         let bestPlayer = this.players[scoreIndex]
 
-        if (bestPlayer.name === this.players[player].name) {
+        // Check if all scores are 0 and no one is finished
+        if (pointsList.every(score => score === 0) && !this.gameFinshed) {
           this.players[player].finished = true
+          this.gameFinshed = true
+        } else if (
+          bestPlayer.name === this.players[player].name &&
+          !this.gameFinished
+        ) {
+          this.players[player].finished = true
+          this.gameFinshed = true
         }
       } else {
         this.players[player].finished = false
@@ -443,12 +453,15 @@ export default {
 }
 .winning {
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: 90%;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: -1;
   img {
-    width: 100%;
+    width: 125%;
+    height: 100%;
   }
 }
 .name {
