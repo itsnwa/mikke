@@ -10,6 +10,7 @@
   --bg-color: hsl(0, 0%, 0%);
   --border-color: hsl(0, 0%, 15%);
   --header-height: 88px;
+  --brand-color: hsl(248, 71%, 49%);
 }
 
 html {
