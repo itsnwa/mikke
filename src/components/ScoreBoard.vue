@@ -1,5 +1,9 @@
 <template>
   <div id="app">
+    <StartGamePopup
+      :show="players.length === 0 || gameFinished"
+      @start-game="startGame"
+    />
     <div
       class="number-picker"
       v-if="selectingNumber"
@@ -121,15 +125,6 @@
       </draggable>
     </div>
     <div class="add-new-player">
-      <div class="label">New player name</div>
-      <input type="text" v-model="newPlayer" />
-      <button
-        class="button"
-        :disabled="newPlayer.length < 2"
-        @click="addPlayer"
-      >
-        Add
-      </button>
       <div class="game-controller">
         <button class="button" @click="restartGame">Restart game</button>
         <button class="button" @click="resetGame">Reset</button>
@@ -140,10 +135,12 @@
 
 <script>
 import draggable from "vuedraggable"
+import StartGamePopup from "@/components/StartGamePopup"
 export default {
   name: "app",
   components: {
-    draggable
+    draggable,
+    StartGamePopup
   },
   data() {
     return {
@@ -156,8 +153,7 @@ export default {
       isTriple: false,
       isDouble: false,
       notDonePlayers: null,
-      gameFinshed: false,
-      newPlayer: "",
+      gameFinished: false,
       drag: false
     }
   },
@@ -178,6 +174,17 @@ export default {
     }
   },
   methods: {
+    startGame(players) {
+      console.log("resetting the game...")
+      this.resetGame()
+      this.players = players
+      this.players.forEach(player => {
+        player.scores = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        player.points = 0
+        player.finished = false
+        player.hit = false
+      })
+    },
     restartGame() {
       this.records = []
       this.isTriple = false
@@ -198,23 +205,10 @@ export default {
       this.isTriple = false
       this.isDouble = false
       this.notDonePlayers = null
-    },
-    addPlayer() {
-      if (this.newPlayer.length >= 2) {
-        this.players.push({
-          name: this.newPlayer,
-          scores: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-          points: 0,
-          finished: false,
-          hit: false,
-          isPlaying: this.players.length <= 0 ? true : false
-        })
-        this.newPlayer = ""
-        this.records.push(JSON.parse(JSON.stringify(this.players)))
-      }
+      this.gameFinished = false
     },
     undo() {
-      this.gameFinshed = false
+      this.gameFinished = false
       this.records.pop()
       this.players = JSON.parse(
         JSON.stringify(this.records[this.records.length - 1])
@@ -329,15 +323,15 @@ export default {
         let bestPlayer = this.players[scoreIndex]
 
         // Check if all scores are 0 and no one is finished
-        if (pointsList.every(score => score === 0) && !this.gameFinshed) {
+        if (pointsList.every(score => score === 0) && !this.gameFinished) {
           this.players[player].finished = true
-          this.gameFinshed = true
+          this.gameFinished = true
         } else if (
           bestPlayer.name === this.players[player].name &&
           !this.gameFinished
         ) {
           this.players[player].finished = true
-          this.gameFinshed = true
+          this.gameFinished = true
         }
       } else {
         this.players[player].finished = false
@@ -537,7 +531,7 @@ export default {
   top: 0;
   width: 100vw;
   height: 100vh;
-  background-color: hsla(0, 0, 0%, 0.9);
+  background-color: hsla(0, 0%, 0%, 0.9);
   z-index: 1000;
 }
 
